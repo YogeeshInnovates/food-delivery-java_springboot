@@ -1,0 +1,56 @@
+# ======================
+# ENV FILES (IMPORTANT)
+# ======================
+.env
+
+# ======================
+# LOG FILES
+# ======================
+*.log
+out.log
+
+# ======================
+# SPRING BOOT / MAVEN
+# ======================
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ======================
+# IDE FILES
+# ======================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+.classpath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# ======================
+# NETBEANS
+# ======================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ======================
+# VS CODE
+# ======================
+.vscode/
+
+# ======================
+# OS FILES
+# ======================
+.DS_Store
+Thumbs.db
