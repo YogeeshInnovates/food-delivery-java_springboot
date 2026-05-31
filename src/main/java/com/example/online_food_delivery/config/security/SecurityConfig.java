@@ -31,6 +31,11 @@ private final CustomUserDetailService  customUserDetailService;
                   .requestMatchers("/api/auth/**").permitAll()
 //                  .requestMatchers("/api/restaurant/add_restaurant").hasRole("OWNER")
                   .requestMatchers("/api/restaurant/**").permitAll()
+                  .requestMatchers(
+                          "/swagger-ui/**",
+                          "/v3/api-docs/**",
+                          "/swagger-ui.html"
+                  ).permitAll()
           .anyRequest().authenticated())
           .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
           .authenticationProvider(daoAuthenticationProvider())

@@ -22,7 +22,6 @@ public class UserRequest {
     @NotBlank
     private String password;
 
-
     @NotBlank
     private String phoneNumber;
 
