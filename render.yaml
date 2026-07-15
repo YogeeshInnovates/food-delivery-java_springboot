@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: online-food-delivery
+    env: docker
+    repo: https://github.com/YogeeshInnovates/food-delivery-java_springboot
+    branch: main
+    plan: starter
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromService:
+          type: postgresql
+          name: food-delivery-db
+          property: connectionString
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: food-delivery-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: food-delivery-redis
+          property: port
+    buildFilter:
+      paths:
+        - src/**
+        - pom.xml
+        - Dockerfile
+
+  - type: postgresql
+    name: food-delivery-db
+    plan: starter
+    region: oregon
+    ipAllowList: []
+
+  - type: redis
+    name: food-delivery-redis
+    plan: starter
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
