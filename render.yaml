@@ -12,10 +12,11 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: SPRING_DATASOURCE_URL
-        fromService:
-          type: postgresql
-          name: food-delivery-db
-          property: connectionString
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
       - key: JWT_SECRET
         sync: false
       - key: CLOUDINARY_CLOUD_NAME
@@ -34,12 +35,6 @@ services:
           type: redis
           name: food-delivery-redis
           property: port
-
-  - type: postgresql
-    name: food-delivery-db
-    plan: starter
-    region: oregon
-    ipAllowList: []
 
   - type: redis
     name: food-delivery-redis

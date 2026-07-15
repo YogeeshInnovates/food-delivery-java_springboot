@@ -8,6 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/yogeeshinnovates/food-delivery-java_springboot
 
 jobs:
   test:
@@ -85,17 +86,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Lowercase repo name
-        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Extract Docker metadata
+      - name: Extract Docker labels
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}
+          images: ${{ env.IMAGE_BASE }}
           tags: |
-            type=sha,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=long,prefix=
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -106,6 +104,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Deploy to Render
+      - name: Deploy specific SHA image to Render
         run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{"image": "${{ env.IMAGE_BASE }}:${{ github.sha }}"}'
