@@ -2,7 +2,7 @@ services:
   - type: web
     name: online-food-delivery
     runtime: image
-    plan: starter
+    plan: free
     region: oregon
     image:
       url: ghcr.io/yogeeshinnovates/food-delivery-java_springboot:latest
@@ -36,7 +36,7 @@ services:
 
   - type: redis
     name: food-delivery-redis
-    plan: starter
+    plan: free
     region: oregon
     maxmemoryPolicy: allkeys-lru
     ipAllowList:
