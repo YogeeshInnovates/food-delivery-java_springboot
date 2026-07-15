@@ -1,12 +1,13 @@
 services:
   - type: web
     name: online-food-delivery
-    env: docker
+    runtime: image
     repo: https://github.com/YogeeshInnovates/food-delivery-java_springboot
     branch: main
     plan: starter
     region: oregon
-    dockerfilePath: ./Dockerfile
+    image:
+      url: ghcr.io/yogeeshinnovates/food-delivery-java_springboot:latest
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
@@ -33,11 +34,6 @@ services:
           type: redis
           name: food-delivery-redis
           property: port
-    buildFilter:
-      paths:
-        - src/**
-        - pom.xml
-        - Dockerfile
 
   - type: postgresql
     name: food-delivery-db
