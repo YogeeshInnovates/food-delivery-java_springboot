@@ -1,6 +1,5 @@
 package com.example.online_food_delivery.model;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -39,7 +38,7 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role  role;
+    private Role role;
 
     @Column(nullable = false)
     private String phoneNumber;
@@ -47,9 +46,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String address;
 
+    @Column(nullable = true)
+    private String profileImageUrl;
+
     @Builder.Default
     @Column(nullable = false)
-    private Boolean isActive= true;
+    private Boolean isActive = true;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
@@ -66,7 +68,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities(){
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
 
     }
@@ -86,4 +88,10 @@ public class User implements UserDetails {
         return true;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return isActive != null ? isActive : true;
+    }
+
 }
+

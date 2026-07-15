@@ -7,6 +7,7 @@ import com.example.online_food_delivery.model.MenuItems;
 import com.example.online_food_delivery.model.User;
 import com.example.online_food_delivery.repository.MenuItemRepository;
 import com.example.online_food_delivery.util.AuthUtil;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class CartService {
 
     private final RedisTemplate<String, Object> redisTemplate;
@@ -32,15 +34,25 @@ public class CartService {
         MenuItems menuItem = menuItemRepository.findById(request.getMenuItemId())
                 .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
 
-        CartItem cartItem = CartItem.builder()
-                .menuItemId(menuItem.getId())
-                .name(menuItem.getName())
-                .price(menuItem.getPrice())
-                .quantity(request.getQuantity())
-                .restaurantId(menuItem.getRestaurant().getId())
-                .build();
+        String hashKey = String.valueOf(menuItem.getId());
 
-        redisTemplate.opsForHash().put(cartKey, String.valueOf(menuItem.getId()), cartItem);
+        CartItem cartItem;
+        if (redisTemplate.opsForHash().hasKey(cartKey, hashKey)) {
+            cartItem = (CartItem) redisTemplate.opsForHash().get(cartKey, hashKey);
+            if (cartItem != null) {
+                cartItem.setQuantity(cartItem.getQuantity() + request.getQuantity());
+            }
+        } else {
+            cartItem = CartItem.builder()
+                    .menuItemId(menuItem.getId())
+                    .name(menuItem.getName())
+                    .price(menuItem.getPrice())
+                    .quantity(request.getQuantity())
+                    .restaurantId(menuItem.getRestaurant().getId())
+                    .build();
+        }
+
+        redisTemplate.opsForHash().put(cartKey, hashKey, cartItem);
     }
 
     public List<CartItem> getCart() {

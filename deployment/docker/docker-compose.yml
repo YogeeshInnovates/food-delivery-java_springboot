@@ -1,0 +1,107 @@
+
+version: '3.8'
+
+services:
+  app:
+    image: maven:3.9.5-eclipse-temurin-17
+    command: mvn spring-boot:run -Dspring-boot.run.profiles=dev -Dmaven.test.skip=true -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    working_dir: /app
+    volumes:
+      - ../../:/app
+      - maven_cache:/root/.m2
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-food_delivery_db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET:-dev_super_secret_key_12345678901234567890}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-daxdbmpbn}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-156199825212945}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-Qx1go3AUYdFLFITHyp7Db1d8e64}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - food-delivery-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8080/ > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-food_delivery_db}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-food_delivery_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - food-delivery-network
+
+  seeder:
+    image: postgres:15-alpine
+    depends_on:
+      app:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - ./init.sql:/init.sql:ro
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD:-postgres}
+    command: psql -h db -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-food_delivery_db} -f /init.sql
+    networks:
+      - food-delivery-network
+    restart: "no"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - food-delivery-network
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ../../../Online_food_delivery_frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_PROXY_TARGET=http://app:8080
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
+    networks:
+      - food-delivery-network
+    depends_on:
+      - app
+
+networks:
+  food-delivery-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  maven_cache:

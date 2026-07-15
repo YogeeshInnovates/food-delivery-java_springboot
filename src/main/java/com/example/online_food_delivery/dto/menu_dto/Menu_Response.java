@@ -17,6 +17,9 @@ public class Menu_Response {
     private Double price;
     private String category;
     private String description;
+    private Boolean isVeg;
+    private String imageUrl;
+    private Boolean isAvailable;
 
     private String status;
 

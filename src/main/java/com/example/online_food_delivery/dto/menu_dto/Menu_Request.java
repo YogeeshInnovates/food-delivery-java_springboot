@@ -15,6 +15,7 @@ public class Menu_Request {
     private Double price;
     private String category;
     private String description;
+    private Boolean isVeg;
 
     private Long restaurantId;
 }

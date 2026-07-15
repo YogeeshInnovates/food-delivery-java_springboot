@@ -48,10 +48,14 @@ this.keys = Keys.hmacShaKeyFor(secret.getBytes());
        return extractExpiration(token).before(new Date());
    }
 
-   public  String generateToken(UserDetails userDetails){
-       Map<String,Object> claims = new HashMap<>();
-       return createToken(claims,userDetails.getUsername());
-   }
+    public  String generateToken(UserDetails userDetails){
+        Map<String,Object> claims = new HashMap<>();
+        claims.put("role", userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority())
+                .orElse("ROLE_CUSTOMER"));
+        return createToken(claims,userDetails.getUsername());
+    }
 
    private String createToken(Map<String,Object> claims,String subject){
        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis()+expiration)).signWith(keys, SignatureAlgorithm.HS256).compact();

@@ -1,6 +1,5 @@
 package com.example.online_food_delivery.dto.restaurantDto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +15,15 @@ public class RestaurantRequest {
     private String name;
 
     @NotBlank
-    private String city;
+    private String cuisineType;
+
+    private String description;
 
     @NotBlank
-    private String cuisine;
+    private String address;
 
+    private String phoneNumber;
+    private String openingTime;
+    private String closingTime;
+    private String city;
 }

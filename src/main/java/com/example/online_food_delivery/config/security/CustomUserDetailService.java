@@ -9,13 +9,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailService  implements UserDetailsService{
-private final UserRepository repo;
+public class CustomUserDetailService implements UserDetailsService {
+    private final UserRepository repo;
 
-public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    return repo.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found"));
-}
-
-
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return repo.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 
 }

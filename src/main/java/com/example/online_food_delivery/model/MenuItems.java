@@ -10,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "menuItems")
+@Table(name = "menu_items")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,8 +27,9 @@ public class MenuItems {
     @Column(nullable = false)
     private Double price;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String category;
+    private MenuCategory category;
 
     @Column(nullable = false)
     private String description;
@@ -36,6 +37,15 @@ public class MenuItems {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
+
+    @Builder.Default
+    private Boolean isVeg = false;
+
+    private String imageUrl;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean isAvailable = true;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -47,5 +57,4 @@ public class MenuItems {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-
 }

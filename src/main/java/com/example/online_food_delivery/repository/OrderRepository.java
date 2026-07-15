@@ -12,12 +12,14 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    Page<Order> findByCustomer(User customer, Pageable pageable);
+    Page<Order> findByCustomerOrderByPlacedAtDesc(User customer, Pageable pageable);
     List<Order> findByRestaurantIdOrderByPlacedAtDesc(Long restaurantId);
     
-    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.customer.id = :customerId AND o.status = 'DELIVERED'")
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.customer.id = :customerId AND o.status NOT IN ('CANCELLED', 'PENDING_PAYMENT')")
     Double getTotalSpendByCustomer(Long customerId);
     
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = 'PLACED'")
     long countPendingOrders();
+
+    List<Order> findByPaymentStatus(com.example.online_food_delivery.model.PaymentStatus paymentStatus);
 }

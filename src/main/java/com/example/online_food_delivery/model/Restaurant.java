@@ -24,14 +24,27 @@ public class Restaurant {
     @Column(nullable = false)
     private String name;
 
+    private String cuisineType;
+    private String description;
+    private String address;
+    private String phoneNumber;
+    private String openingTime;
+    private String closingTime;
+    private String imageUrl;
+    private String licenseNumber;
     private String city;
-    private String cuisine;
+    private Double latitude;
+    private Double longitude;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
 
     private Double rating = 0.0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean isActive = true;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

@@ -3,6 +3,7 @@ package com.example.online_food_delivery.controller;
 import com.example.online_food_delivery.dto.cart_dto.CartItemRequest;
 import com.example.online_food_delivery.model.CartItem;
 import com.example.online_food_delivery.service.CartService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
 public class CartController {
@@ -21,6 +23,7 @@ public class CartController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<CartItem>> getCart() {
         return ResponseEntity.ok(cartService.getCart());
+
     }
 
     @PostMapping("/items")

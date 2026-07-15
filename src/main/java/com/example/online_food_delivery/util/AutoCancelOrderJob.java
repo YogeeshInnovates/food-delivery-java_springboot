@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.online_food_delivery.model.PaymentStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,11 +25,12 @@ public class AutoCancelOrderJob {
     @Transactional
     public void cancelUnacceptedOrders() {
         log.info("Starting AutoCancelOrderJob...");
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(2);
         List<Order> allOrders = orderRepository.findAll();
         
         List<Order> staleOrders = allOrders.stream()
-                .filter(o -> o.getStatus() == OrderStatus.PLACED && o.getPlacedAt().isBefore(threshold))
+                .filter(o -> o.getStatus() == OrderStatus.PENDING_PAYMENT
+                        && o.getPlacedAt().isBefore(threshold))
                 .toList();
 
         if (!staleOrders.isEmpty()) {
@@ -37,6 +39,21 @@ public class AutoCancelOrderJob {
                 order.setStatus(OrderStatus.CANCELLED);
                 orderRepository.save(order);
                 log.info("Cancelled Order ID: {}", order.getId());
+            }
+        }
+    }
+
+    // Run every 10 seconds to auto-complete refunds
+    @Scheduled(fixedRate = 10000)
+    @Transactional
+    public void processRefunds() {
+        List<Order> refundingOrders = orderRepository.findByPaymentStatus(PaymentStatus.PROCESSING_REFUND);
+        LocalDateTime now = LocalDateTime.now();
+        for (Order order : refundingOrders) {
+            if (order.getUpdatedAt() != null && order.getUpdatedAt().plusSeconds(10).isBefore(now)) {
+                order.setPaymentStatus(PaymentStatus.REFUNDED);
+                orderRepository.save(order);
+                log.info("Refund completed for Order ID: {} (₹{})", order.getId(), order.getRefundAmount());
             }
         }
     }
