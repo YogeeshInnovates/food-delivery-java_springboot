@@ -2,8 +2,6 @@ services:
   - type: web
     name: online-food-delivery
     runtime: image
-    repo: https://github.com/YogeeshInnovates/food-delivery-java_springboot
-    branch: main
     plan: starter
     region: oregon
     image:
@@ -41,3 +39,6 @@ services:
     plan: starter
     region: oregon
     maxmemoryPolicy: allkeys-lru
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: allow all (or restrict to specific IPs if you want tighter security)
