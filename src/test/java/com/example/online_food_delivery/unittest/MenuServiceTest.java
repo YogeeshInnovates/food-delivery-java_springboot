@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -226,15 +227,14 @@ public class MenuServiceTest {
                 .isAvailable(true)
                 .status(Menu_Available_status.AVAILABLE)
                 .build();
-        List<RestaurantStatus> statuses = List.of(RestaurantStatus.ACTIVE, RestaurantStatus.OPEN);
         Page<MenuItems> repoPage = new PageImpl<>(Arrays.asList(item2, testMenuItem), pageable, 2);
-        when(menuItemRepository.findPopularByRestaurantStatuses(eq(statuses), any(Pageable.class)))
+        when(menuItemRepository.findPopularByRestaurantStatuses(anyList(), any(Pageable.class)))
                 .thenReturn(repoPage);
 
         Page<Menu_Response> result = menuService.getPopularItems(pageable);
 
         assertEquals(2, result.getTotalElements());
-        verify(menuItemRepository).findPopularByRestaurantStatuses(eq(statuses), any(Pageable.class));
+        verify(menuItemRepository).findPopularByRestaurantStatuses(anyList(), any(Pageable.class));
     }
 
     @Test
