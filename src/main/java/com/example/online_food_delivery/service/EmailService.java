@@ -18,12 +18,16 @@ public class EmailService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
+    @Value("${spring.mail.username}")
+    private String mailUsername;
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
     public void sendOtpEmail(String to, String otp, String name) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("FoodRush Team <" + mailUsername + ">");
         message.setTo(to);
         message.setSubject("FoodRush - Email Verification");
         message.setText("Hi " + name + ",\n\n"
@@ -38,6 +42,7 @@ public class EmailService {
         try {
             MimeMessage mime = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
+            helper.setFrom("FoodRush Team <" + mailUsername + ">");
             helper.setTo(to);
             helper.setSubject("Welcome to FoodRush! \uD83C\uDF54\uD83D\uDE80");
             helper.setText(buildWelcomeHtml(name), true);
