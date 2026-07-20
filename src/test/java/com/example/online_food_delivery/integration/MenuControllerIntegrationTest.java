@@ -4,6 +4,8 @@ import com.example.online_food_delivery.dto.authdto.LoginRequest;
 import com.example.online_food_delivery.dto.authdto.LoginResponse;
 import com.example.online_food_delivery.dto.authdto.UserRequest;
 import com.example.online_food_delivery.dto.menu_dto.Menu_Request;
+import com.example.online_food_delivery.model.RestaurantStatus;
+import com.example.online_food_delivery.repository.RestaurantRepository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -28,6 +30,9 @@ class MenuControllerIntegrationTest {
 
         @Autowired
         private MockMvc mvc;
+
+        @Autowired
+        private RestaurantRepository restaurantRepository;
 
         private final ObjectMapper json = new ObjectMapper();
 
@@ -195,6 +200,11 @@ class MenuControllerIntegrationTest {
         void test_getPopularItems_paginated() throws Exception {
                 String ownerToken = registerAndLogin("Ramesh", "popular_menu_test@test.com", "ownerpass", "OWNER");
                 Long restaurantId = createRestaurant(ownerToken, "PopularPlace");
+
+                restaurantRepository.findById(restaurantId).ifPresent(r -> {
+                        r.setStatus(RestaurantStatus.ACTIVE);
+                        restaurantRepository.save(r);
+                });
 
                 addMenuItem(ownerToken, restaurantId, "Burger", 5.99, "BURGER");
                 addMenuItem(ownerToken, restaurantId, "Fries", 2.99, "STARTERS");
