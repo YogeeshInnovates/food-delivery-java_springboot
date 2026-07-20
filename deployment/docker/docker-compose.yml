@@ -12,6 +12,8 @@ services:
     ports:
       - "8080:8080"
       - "5005:5005"
+    env_file:
+      - ../../.env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-food_delivery_db}
@@ -19,10 +21,12 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      - JWT_SECRET=${JWT_SECRET:-dev_super_secret_key_12345678901234567890}
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-daxdbmpbn}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-156199825212945}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-Qx1go3AUYdFLFITHyp7Db1d8e64}
+      - JWT_SECRET=${JWT_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
@@ -90,6 +94,7 @@ services:
       - /app/node_modules
     environment:
       - VITE_PROXY_TARGET=http://app:8080
+      - VITE_API_BASE_URL=http://localhost:5173
     command: sh -c "npm install && npm run dev"
     ports:
       - "5173:5173"

@@ -8,6 +8,7 @@ import com.example.online_food_delivery.model.MenuCategory;
 import com.example.online_food_delivery.model.MenuItems;
 import com.example.online_food_delivery.model.Menu_Available_status;
 import com.example.online_food_delivery.model.Restaurant;
+import com.example.online_food_delivery.model.RestaurantStatus;
 import com.example.online_food_delivery.model.User;
 import com.example.online_food_delivery.repository.MenuItemRepository;
 import com.example.online_food_delivery.repository.RestaurantRepository;
@@ -152,7 +153,8 @@ public class MenuService {
 
     public Page<Menu_Response> getPopularItems(Pageable pageable) {
         Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "id"));
-        Page<MenuItems> items = menuItemRepository.findByIsDeletedFalseAndIsAvailableTrue(sorted);
+        Page<MenuItems> items = menuItemRepository.findPopularByRestaurantStatuses(
+                List.of(RestaurantStatus.ACTIVE, RestaurantStatus.OPEN), sorted);
         return items.map(this::mapToResponse);
     }
 

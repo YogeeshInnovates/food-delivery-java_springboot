@@ -183,7 +183,7 @@ public class RestaurantService {
         Restaurant restaurant = restRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         if (restaurant.getStatus() == RestaurantStatus.OPEN) {
-            restaurant.setStatus(RestaurantStatus.ACTIVE);
+        restaurant.setStatus(RestaurantStatus.PENDING);
         } else {
             restaurant.setStatus(RestaurantStatus.OPEN);
         }

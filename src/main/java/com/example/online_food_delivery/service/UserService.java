@@ -2,6 +2,7 @@ package com.example.online_food_delivery.service;
 
 import com.example.online_food_delivery.config.security.JwtUtil;
 import com.example.online_food_delivery.dto.authdto.*;
+import com.example.online_food_delivery.exception.BadRequestException;
 import com.example.online_food_delivery.exception.DublicateResourceFoundException;
 import com.example.online_food_delivery.exception.ResourceNotFoundException;
 import com.example.online_food_delivery.exception.UnauthorizedException;
@@ -34,6 +35,78 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final AuthUtil authUtil;
+    private final OtpVerificationService otpVerificationService;
+
+    public void sendOtpForCustomer(UserRequest user) {
+        if (userrepo.existsByEmail(user.getEmail())) {
+            throw new DublicateResourceFoundException("Email already registered with this email");
+        }
+        RegistrationOtpData data = RegistrationOtpData.builder()
+                .role("CUSTOMER")
+                .name(user.getName())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .phoneNumber(user.getPhoneNumber())
+                .address(user.getAddress())
+                .build();
+        otpVerificationService.sendAndStoreOtp(data);
+    }
+
+    public void sendOtpForOwner(OwnerRegisterRequest req) {
+        if (userrepo.existsByEmail(req.getEmail())) {
+            throw new DublicateResourceFoundException("Email already registered with this email");
+        }
+        RegistrationOtpData data = RegistrationOtpData.builder()
+                .role("OWNER")
+                .name(req.getName())
+                .email(req.getEmail())
+                .password(req.getPassword())
+                .phoneNumber(req.getPhoneNumber())
+                .address(req.getAddress())
+                .restaurantName(req.getRestaurantName())
+                .licenseNumber(req.getLicenseNumber())
+                .restaurantAddress(req.getRestaurantAddress())
+                .build();
+        otpVerificationService.sendAndStoreOtp(data);
+    }
+
+    @Transactional
+    public UserResponse completeRegistrationWithOtp(String email, String otp) {
+        RegistrationOtpData data = otpVerificationService.verifyOtp(email, otp);
+
+        if ("CUSTOMER".equals(data.getRole())) {
+            User user = User.builder()
+                    .name(data.getName())
+                    .email(data.getEmail())
+                    .password(passwordEncoder.encode(data.getPassword()))
+                    .role(Role.CUSTOMER)
+                    .phoneNumber(data.getPhoneNumber())
+                    .address(data.getAddress())
+                    .build();
+            User saved = userrepo.save(user);
+            return mapToUserResponse(saved);
+        } else {
+            User user = User.builder()
+                    .name(data.getName())
+                    .email(data.getEmail())
+                    .password(passwordEncoder.encode(data.getPassword()))
+                    .role(Role.OWNER)
+                    .phoneNumber(data.getPhoneNumber())
+                    .address(data.getAddress())
+                    .build();
+            User savedUser = userrepo.save(user);
+
+            if (data.getRestaurantName() != null && !data.getRestaurantName().isBlank()) {
+                Restaurant restaurant = Restaurant.builder()
+                        .name(data.getRestaurantName())
+                        .address(data.getRestaurantAddress() != null ? data.getRestaurantAddress() : data.getAddress())
+                        .owner(savedUser)
+                        .build();
+                restaurantRepository.save(restaurant);
+            }
+            return mapToUserResponse(savedUser);
+        }
+    }
 
     public UserResponse create_user(UserRequest user) {
 
