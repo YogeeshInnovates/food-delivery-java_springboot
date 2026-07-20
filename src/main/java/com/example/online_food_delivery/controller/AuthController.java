@@ -8,7 +8,6 @@ import com.example.online_food_delivery.dto.authdto.LoginResponse;
 import com.example.online_food_delivery.dto.authdto.VerifyOtpRequest;
 import com.example.online_food_delivery.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,31 +22,20 @@ public class AuthController {
 
     private final UserService userService;
 
-    @Value("${app.otp.enabled:true}")
-    private boolean otpEnabled;
-
     public AuthController(UserService userservice){
         this.userService = userservice;
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequest userrequest){
-        if (otpEnabled) {
-            userService.sendOtpForCustomer(userrequest);
-            return ResponseEntity.ok(Map.of("message", "Verification code sent to your email", "email", userrequest.getEmail()));
-        }
-        UserResponse res = userService.create_user(userrequest);
-        return ResponseEntity.ok(res);
+        userService.sendOtpForCustomer(userrequest);
+        return ResponseEntity.ok(Map.of("message", "Verification code sent to your email", "email", userrequest.getEmail()));
     }
 
     @PostMapping("/owner/register")
     public ResponseEntity<?> registerOwner(@Valid @RequestBody OwnerRegisterRequest request){
-        if (otpEnabled) {
-            userService.sendOtpForOwner(request);
-            return ResponseEntity.ok(Map.of("message", "Verification code sent to your email", "email", request.getEmail()));
-        }
-        UserResponse res = userService.create_owner(request);
-        return ResponseEntity.ok(res);
+        userService.sendOtpForOwner(request);
+        return ResponseEntity.ok(Map.of("message", "Verification code sent to your email", "email", request.getEmail()));
     }
 
     @PostMapping("/verify-otp")

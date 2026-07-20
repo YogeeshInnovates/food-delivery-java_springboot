@@ -2,6 +2,7 @@ package com.example.online_food_delivery.service;
 
 import com.example.online_food_delivery.dto.authdto.RegistrationOtpData;
 import com.example.online_food_delivery.exception.BadRequestException;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Profile("!test")
 public class OtpVerificationService {
 
     private static final String OTP_PREFIX = "otp:";

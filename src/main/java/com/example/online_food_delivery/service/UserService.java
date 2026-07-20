@@ -13,7 +13,7 @@ import com.example.online_food_delivery.model.User;
 import com.example.online_food_delivery.repository.RestaurantRepository;
 import com.example.online_food_delivery.repository.UserRepository;
 import com.example.online_food_delivery.util.AuthUtil;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userrepo;
     private final RestaurantRepository restaurantRepository;
@@ -35,11 +34,28 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final AuthUtil authUtil;
-    private final OtpVerificationService otpVerificationService;
+
+    @Autowired(required = false)
+    private OtpVerificationService otpVerificationService;
+
+    public UserService(UserRepository userrepo, RestaurantRepository restaurantRepository,
+                       PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
+                       JwtUtil jwtUtil, AuthUtil authUtil) {
+        this.userrepo = userrepo;
+        this.restaurantRepository = restaurantRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.authUtil = authUtil;
+    }
 
     public void sendOtpForCustomer(UserRequest user) {
         if (userrepo.existsByEmail(user.getEmail())) {
             throw new DublicateResourceFoundException("Email already registered with this email");
+        }
+        if (otpVerificationService == null) {
+            create_user(user);
+            return;
         }
         RegistrationOtpData data = RegistrationOtpData.builder()
                 .role("CUSTOMER")
@@ -55,6 +71,10 @@ public class UserService {
     public void sendOtpForOwner(OwnerRegisterRequest req) {
         if (userrepo.existsByEmail(req.getEmail())) {
             throw new DublicateResourceFoundException("Email already registered with this email");
+        }
+        if (otpVerificationService == null) {
+            create_owner(req);
+            return;
         }
         RegistrationOtpData data = RegistrationOtpData.builder()
                 .role("OWNER")
@@ -72,6 +92,9 @@ public class UserService {
 
     @Transactional
     public UserResponse completeRegistrationWithOtp(String email, String otp) {
+        if (otpVerificationService == null) {
+            throw new BadRequestException("OTP verification not available");
+        }
         RegistrationOtpData data = otpVerificationService.verifyOtp(email, otp);
 
         if ("CUSTOMER".equals(data.getRole())) {
