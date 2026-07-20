@@ -57,7 +57,7 @@ public class AuthControllerIntegrationTest {
                 .name("Satish")
                 .email("example1@gmail.com")
                 .password("12789")
-                .phoneNumber("945456129")
+                .phoneNumber("9454561290")
                 .address("Bangalore")
                 .build();
 
