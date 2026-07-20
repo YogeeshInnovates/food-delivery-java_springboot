@@ -38,6 +38,9 @@ public class UserService {
     @Autowired(required = false)
     private OtpVerificationService otpVerificationService;
 
+    @Autowired(required = false)
+    private EmailService emailService;
+
     public UserService(UserRepository userrepo, RestaurantRepository restaurantRepository,
                        PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
                        JwtUtil jwtUtil, AuthUtil authUtil) {
@@ -107,6 +110,7 @@ public class UserService {
                     .address(data.getAddress())
                     .build();
             User saved = userrepo.save(user);
+            if (emailService != null) emailService.sendWelcomeEmail(saved.getEmail(), saved.getName());
             return mapToUserResponse(saved);
         } else {
             User user = User.builder()
@@ -127,6 +131,7 @@ public class UserService {
                         .build();
                 restaurantRepository.save(restaurant);
             }
+            if (emailService != null) emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getName());
             return mapToUserResponse(savedUser);
         }
     }
@@ -140,6 +145,7 @@ public class UserService {
                 .password(passwordEncoder.encode(user.getPassword())).role(Role.CUSTOMER)
                 .phoneNumber(user.getPhoneNumber()).address(user.getAddress()).build();
         User savedrepo = userrepo.save(users);
+        if (emailService != null) emailService.sendWelcomeEmail(savedrepo.getEmail(), savedrepo.getName());
         return mapToUserResponse(savedrepo);
     }
 
@@ -158,6 +164,7 @@ public class UserService {
                 .address(req.getAddress())
                 .build();
         User savedUser = userrepo.save(user);
+        if (emailService != null) emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getName());
 
         // If optional restaurant fields are provided, auto-create a restaurant
         if (req.getRestaurantName() != null && !req.getRestaurantName().isBlank()) {

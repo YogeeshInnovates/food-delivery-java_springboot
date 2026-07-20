@@ -2,6 +2,7 @@ package com.example.online_food_delivery.dto.authdto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ public class CreateAdminRequest {
     @NotBlank
     private String name;
 
-    @Email
+    @Email(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "Invalid email format")
     @NotBlank
     private String email;
 
@@ -22,5 +23,6 @@ public class CreateAdminRequest {
     private String password;
 
     @NotBlank
+    @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     private String phoneNumber;
 }
