@@ -12,8 +12,6 @@ services:
     ports:
       - "8080:8080"
       - "5005:5005"
-    env_file:
-      - ../../.env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-food_delivery_db}
