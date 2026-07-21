@@ -1,55 +1,28 @@
 package com.example.online_food_delivery.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
 @Profile("!test")
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final EmailSender emailSender;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    @Value("${spring.mail.username}")
-    private String mailUsername;
-
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public EmailService(EmailSender emailSender) {
+        this.emailSender = emailSender;
     }
 
     public void sendOtpEmail(String to, String otp, String name) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("FoodRush Team <" + mailUsername + ">");
-        message.setTo(to);
-        message.setSubject("FoodRush - Email Verification");
-        message.setText("Hi " + name + ",\n\n"
-                + "Your email verification code is: " + otp + "\n\n"
-                + "This code is valid for 10 minutes.\n\n"
-                + "If you did not request this, please ignore this email.\n\n"
-                + "Thank you,\nFoodRush Team");
-        mailSender.send(message);
+        emailSender.sendOtp(to, otp, name);
     }
 
     public void sendWelcomeEmail(String to, String name) {
-        try {
-            MimeMessage mime = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
-            helper.setFrom("FoodRush Team <" + mailUsername + ">");
-            helper.setTo(to);
-            helper.setSubject("Welcome to FoodRush! \uD83C\uDF54\uD83D\uDE80");
-            helper.setText(buildWelcomeHtml(name), true);
-            mailSender.send(mime);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send welcome email", e);
-        }
+        emailSender.sendWelcomeHtml(to, name, buildWelcomeHtml(name));
     }
 
     private String buildWelcomeHtml(String name) {
