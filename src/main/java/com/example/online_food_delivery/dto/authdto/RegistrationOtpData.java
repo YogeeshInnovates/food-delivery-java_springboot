@@ -20,4 +20,5 @@ public class RegistrationOtpData {
     private String restaurantName;
     private String licenseNumber;
     private String restaurantAddress;
+    private Long sentAt;
 }
