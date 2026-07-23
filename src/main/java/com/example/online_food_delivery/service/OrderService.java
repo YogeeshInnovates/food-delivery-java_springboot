@@ -175,6 +175,40 @@ public class OrderService {
         return mapToResponse(updatedOrder);
     }
 
+    public List<OrderResponse> getOwnerOrders() {
+        User user = authUtil.currentUser();
+        return orderRepository.findOrdersByOwnerId(user.getId()).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<OrderResponse> getOwnerOrdersByStatus(String status) {
+        User user = authUtil.currentUser();
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
+        return orderRepository.findOrdersByOwnerIdAndStatus(user.getId(), orderStatus).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public OrderResponse acceptOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        User user = authUtil.currentUser();
+        if (!order.getRestaurant().getOwner().getId().equals(user.getId())) {
+            throw new UnauthorizedException("Only the restaurant owner can accept this order");
+        }
+
+        if (order.getStatus() != OrderStatus.PLACED) {
+            throw new BadRequestException("Only PLACED orders can be accepted");
+        }
+
+        order.setStatus(OrderStatus.ACCEPTED);
+        Order updatedOrder = orderRepository.save(order);
+        return mapToResponse(updatedOrder);
+    }
+
     @Transactional
     public OrderResponse confirmDelivery(Long orderId) {
         Order order = orderRepository.findById(orderId)

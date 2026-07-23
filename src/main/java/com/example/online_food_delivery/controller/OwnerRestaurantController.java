@@ -3,7 +3,9 @@ package com.example.online_food_delivery.controller;
 import com.example.online_food_delivery.dto.restaurantDto.CompleteRegistrationRequest;
 import com.example.online_food_delivery.dto.restaurantDto.RestaurantRequest;
 import com.example.online_food_delivery.dto.restaurantDto.RestaurantResponse;
+import com.example.online_food_delivery.dto.order_dto.OrderResponse;
 import com.example.online_food_delivery.service.CloudinaryService;
+import com.example.online_food_delivery.service.OrderService;
 import com.example.online_food_delivery.service.RestaurantService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -27,6 +29,7 @@ public class OwnerRestaurantController {
 
     private final RestaurantService restaurantService;
     private final CloudinaryService cloudinaryService;
+    private final OrderService orderService;
 
     @PostMapping
     public ResponseEntity<RestaurantResponse> createRestaurant(@Valid @RequestBody RestaurantRequest request) {
@@ -93,5 +96,20 @@ public class OwnerRestaurantController {
         }
         restaurantService.removeRestaurantImage(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<List<OrderResponse>> getMyOrders() {
+        return ResponseEntity.ok(orderService.getOwnerOrders());
+    }
+
+    @GetMapping("/orders/pending")
+    public ResponseEntity<List<OrderResponse>> getPendingOrders() {
+        return ResponseEntity.ok(orderService.getOwnerOrdersByStatus("PLACED"));
+    }
+
+    @PostMapping("/orders/{orderId}/accept")
+    public ResponseEntity<OrderResponse> acceptOrder(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.acceptOrder(orderId));
     }
 }
