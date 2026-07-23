@@ -180,6 +180,10 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new BadRequestException("Cannot confirm delivery for a cancelled order");
+        }
+
         User user = authUtil.currentUser();
         if (!order.getCustomer().getId().equals(user.getId())) {
             throw new UnauthorizedException("Unauthorized to confirm delivery for this order");
