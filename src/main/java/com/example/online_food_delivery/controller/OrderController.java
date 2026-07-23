@@ -61,6 +61,12 @@ public class OrderController {
         return ResponseEntity.ok(resp);
     }
 
+    @PostMapping("/{id}/confirm-delivery")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<OrderResponse> confirmDelivery(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.confirmDelivery(id));
+    }
+
     @PostMapping("/{id}/pay")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<OrderResponse> payForOrder(

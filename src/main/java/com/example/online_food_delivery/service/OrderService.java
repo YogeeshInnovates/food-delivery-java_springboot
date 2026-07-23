@@ -176,6 +176,21 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderResponse confirmDelivery(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        User user = authUtil.currentUser();
+        if (!order.getCustomer().getId().equals(user.getId())) {
+            throw new UnauthorizedException("Unauthorized to confirm delivery for this order");
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        Order updatedOrder = orderRepository.save(order);
+        return mapToResponse(updatedOrder);
+    }
+
+    @Transactional
     public OrderResponse cancelOrder(Long orderId, String reason) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
