@@ -20,6 +20,22 @@ public class AutoCancelOrderJob {
 
     private final OrderRepository orderRepository;
 
+    // Run every 3 seconds to auto-accept PLACED orders after 5 seconds
+    @Scheduled(fixedRate = 3000)
+    @Transactional
+    public void autoAcceptOrders() {
+        LocalDateTime threshold = LocalDateTime.now().minusSeconds(5);
+        List<Order> placedOrders = orderRepository.findByStatus(OrderStatus.PLACED);
+
+        for (Order order : placedOrders) {
+            if (order.getPlacedAt().isBefore(threshold)) {
+                order.setStatus(OrderStatus.ACCEPTED);
+                orderRepository.save(order);
+                log.info("Auto-accepted Order ID: {}", order.getId());
+            }
+        }
+    }
+
     // Run every 5 minutes
     @Scheduled(fixedRate = 300000)
     @Transactional

@@ -28,4 +28,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countPendingOrders();
 
     List<Order> findByPaymentStatus(com.example.online_food_delivery.model.PaymentStatus paymentStatus);
+
+    List<Order> findByStatus(com.example.online_food_delivery.model.OrderStatus status);
 }
